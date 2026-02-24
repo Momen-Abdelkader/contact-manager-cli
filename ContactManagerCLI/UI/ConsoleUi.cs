@@ -13,7 +13,7 @@ public class ConsoleUi : IUi
         _contactService = contactService;
     }
 
-    public void Run()
+    public async Task Run()
     {
         while (true)
         {
@@ -56,10 +56,10 @@ public class ConsoleUi : IUi
                     FilterContacts();
                     break;
                 case "8":
-                    SaveContacts();
+                    await SaveContacts();
                     break;
                 case "9":
-                    if (ConfirmExit()) return;
+                    if (await ConfirmExit()) return;
                     break;
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
@@ -293,13 +293,13 @@ public class ConsoleUi : IUi
         }
     }
 
-    private bool ConfirmExit()
+    private async Task<bool> ConfirmExit()
     {
         Console.Write("Save changes before exiting? (y/n): ");
         var answer = Console.ReadLine()?.Trim().ToLower();
         if (answer == "y")
         {
-            _contactService.SaveAll();
+            await _contactService.SaveAll();
             Console.WriteLine("Changes saved. Exiting...");
         }
         else if (answer == "n")
@@ -314,9 +314,9 @@ public class ConsoleUi : IUi
         return true;
     }
 
-    private void SaveContacts()
+    private async Task SaveContacts()
     {
-        _contactService.SaveAll();
+        await _contactService.SaveAll();
         Console.WriteLine("Contacts saved successfully.");
     }
 }

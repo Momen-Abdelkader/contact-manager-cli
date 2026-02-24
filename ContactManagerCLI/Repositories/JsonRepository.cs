@@ -15,7 +15,6 @@ public class JsonRepository<T> : IRepository<T> where T : BaseEntity
     public JsonRepository(string filePath)
     {
         _filePath = filePath;
-        Load();
     }
 
     public List<T> GetAll() => _entities.Values.ToList();
@@ -30,8 +29,6 @@ public class JsonRepository<T> : IRepository<T> where T : BaseEntity
         {
             throw new ArgumentException($"{typeof(T).Name} with id '{entity.Id}' already exists.");
         }
-        
-        SaveAll();
     }
 
     public void Update(T entity)
@@ -40,9 +37,8 @@ public class JsonRepository<T> : IRepository<T> where T : BaseEntity
         {
             throw new KeyNotFoundException($"{typeof(T).Name} with id '{entity.Id}' not found.");
         }
-        
+
         _entities[entity.Id] = entity;
-        SaveAll();
     }
 
     public void Delete(Guid id)
@@ -51,24 +47,22 @@ public class JsonRepository<T> : IRepository<T> where T : BaseEntity
         {
             throw new KeyNotFoundException($"{typeof(T).Name} with id '{id}' not found.");
         }
-        
-        SaveAll();
     }
 
-    public void SaveAll()
+    public async Task SaveAll()
     {
         var json = JsonSerializer.Serialize(_entities.Values.ToList(), JsonOptions);
-        File.WriteAllText(_filePath, json);
+        await File.WriteAllTextAsync(_filePath, json);
     }
 
-    public void Load()
+    public async Task Load()
     {
         if (!File.Exists(_filePath))
         {
             return;
         }
 
-        var json = File.ReadAllText(_filePath);
+        var json = await File.ReadAllTextAsync(_filePath);
         var list = JsonSerializer.Deserialize<List<T>>(json, JsonOptions) ?? [];
         _entities = list.ToDictionary(Entity => Entity.Id);
     }

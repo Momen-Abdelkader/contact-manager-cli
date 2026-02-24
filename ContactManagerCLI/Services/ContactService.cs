@@ -32,6 +32,6 @@ public class ContactService : IContactService
 
     public void DeleteContact(Guid id) => _repository.Delete(id);
 
-    public void SaveAll() => _repository.SaveAll();
+    public async Task SaveAll() => await _repository.SaveAll();
 }
 

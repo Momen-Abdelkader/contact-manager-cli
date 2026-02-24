@@ -8,7 +8,7 @@ namespace ContactManagerCLI;
 
 class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
         var projectDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
 
@@ -31,11 +31,12 @@ class Program
         {
             var filePath = Path.Combine(projectDir, fileName);
             repository = new JsonRepository<Contact>(filePath);
+            await repository.Load();
             Console.WriteLine($"Loaded {repository.Count} contact(s) from '{fileName}'.");
         }
 
         var service = new ContactService(repository);
         var ui = new ConsoleUi(service);
-        ui.Run();
+        await ui.Run();
     }
 }

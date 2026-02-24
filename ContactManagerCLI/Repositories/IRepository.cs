@@ -11,6 +11,6 @@ public interface IRepository<T> where T : BaseEntity
     void Add(T entity);
     void Update(T entity);
     void Delete(Guid id);
-    void SaveAll();
-    void Load();
+    Task SaveAll();
+    Task Load();
 }

@@ -11,5 +11,5 @@ public interface IContactService
         void AddContact(Contact contact);
         void UpdateContact(Contact contact);
         void DeleteContact(Guid id);
-        void SaveAll();
+        Task SaveAll();
 }
