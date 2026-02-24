@@ -10,6 +10,8 @@ public class JsonRepository<T> : IRepository<T> where T : BaseEntity
 
     private static readonly JsonSerializerOptions JsonOptions = new(){ WriteIndented = true };
 
+    public int Count => _entities.Count;
+
     public JsonRepository(string filePath)
     {
         _filePath = filePath;

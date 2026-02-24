@@ -1,0 +1,280 @@
+using ContactManagerCLI.Models;
+using ContactManagerCLI.Services;
+
+namespace ContactManagerCLI.UI;
+
+public class ConsoleUi : IUi
+{
+    private readonly IContactService _contactService;
+
+    public ConsoleUi(IContactService contactService)
+    {
+        _contactService = contactService;
+    }
+
+    public void Run()
+    {
+        while (true)
+        {
+            Console.WriteLine();
+            Console.WriteLine("----- Contact Manager -----");
+            Console.WriteLine("1. Add Contact");
+            Console.WriteLine("2. Edit Contact");
+            Console.WriteLine("3. Delete Contact");
+            Console.WriteLine("4. View Contact");
+            Console.WriteLine("5. List Contacts");
+            Console.WriteLine("6. Search");
+            Console.WriteLine("7. Filter");
+            Console.WriteLine("8. Save");
+            Console.WriteLine("9. Exit");
+            Console.Write("Choose an option: ");
+
+            var choice = Console.ReadLine()?.Trim();
+
+            switch (choice)
+            {
+                case "1":
+                    AddContact();
+                    break;
+                case "2":
+                    EditContact();
+                    break;
+                case "3":
+                    DeleteContact();
+                    break;
+                case "4":
+                    ViewContact();
+                    break;
+                case "5":
+                    ListContacts();
+                    break;
+                case "6":
+                    SearchContacts();
+                    break;
+                case "7":
+                    FilterContacts();
+                    break;
+                case "8":
+                    SaveContacts();
+                    break;
+                case "9":
+                    Console.WriteLine("Exiting...");
+                    return;
+                default:
+                    Console.WriteLine("Invalid option. Please try again.");
+                    break;
+            }
+        }
+    }
+
+    private void AddContact()
+    {
+        Console.Write("Name: ");
+        var name = Console.ReadLine()?.Trim();
+        if (string.IsNullOrEmpty(name))
+        {
+            Console.WriteLine("Name cannot be empty.");
+            return;
+        }
+
+        Console.Write("Email: ");
+        var email = Console.ReadLine()?.Trim();
+        if (string.IsNullOrEmpty(email))
+        {
+            Console.WriteLine("Email cannot be empty.");
+            return;
+        }
+
+        Console.Write("Phone: ");
+        var phone = Console.ReadLine()?.Trim();
+        if (string.IsNullOrEmpty(phone))
+        {
+            Console.WriteLine("Phone cannot be empty.");
+            return;
+        }
+
+        var contact = new Contact(name, email, phone);
+        _contactService.AddContact(contact);
+        Console.WriteLine("Contact added successfully.");
+        Console.WriteLine($"  {contact}");
+    }
+
+    private void EditContact()
+    {
+        Console.Write("Enter contact ID to edit: ");
+        var input = Console.ReadLine()?.Trim();
+        if (!Guid.TryParse(input, out var id))
+        {
+            Console.WriteLine("Invalid ID format.");
+            return;
+        }
+
+        var contact = _contactService.GetContactById(id);
+        if (contact is null)
+        {
+            Console.WriteLine("Contact not found.");
+            return;
+        }
+
+        Console.WriteLine($"Current Name: {contact.Name}");
+        Console.Write("New Name (leave blank to keep): ");
+        var name = Console.ReadLine()?.Trim();
+        if (!string.IsNullOrEmpty(name))
+        {
+            contact.Name = name;
+        }
+
+        Console.WriteLine($"Current Email: {contact.Email}");
+        Console.Write("New Email (leave blank to keep): ");
+        var email = Console.ReadLine()?.Trim();
+        if (!string.IsNullOrEmpty(email))
+        {
+            contact.Email = email;
+        }
+
+        Console.WriteLine($"Current Phone: {contact.PhoneNumber}");
+        Console.Write("New Phone (leave blank to keep): ");
+        var phone = Console.ReadLine()?.Trim();
+        if (!string.IsNullOrEmpty(phone))
+        {
+            contact.PhoneNumber = phone;
+        }
+
+        _contactService.UpdateContact(contact);
+        Console.WriteLine("Contact updated successfully.");
+        Console.WriteLine($"  {contact}");
+    }
+
+    private void DeleteContact()
+    {
+        Console.Write("Enter contact ID to delete: ");
+        var input = Console.ReadLine()?.Trim();
+        if (!Guid.TryParse(input, out var id))
+        {
+            Console.WriteLine("Invalid ID format.");
+            return;
+        }
+
+        try
+        {
+            _contactService.DeleteContact(id);
+            Console.WriteLine("Contact deleted successfully.");
+        }
+        catch (KeyNotFoundException)
+        {
+            Console.WriteLine("Contact not found.");
+        }
+    }
+
+    private void ViewContact()
+    {
+        Console.Write("Enter contact ID to view: ");
+        var input = Console.ReadLine()?.Trim();
+        if (!Guid.TryParse(input, out var id))
+        {
+            Console.WriteLine("Invalid ID format.");
+            return;
+        }
+
+        var contact = _contactService.GetContactById(id);
+        if (contact is null)
+        {
+            Console.WriteLine("Contact not found.");
+            return;
+        }
+
+        Console.WriteLine($"  {contact}");
+    }
+
+    private void ListContacts()
+    {
+        var contacts = _contactService.GetAllContacts();
+        if (contacts.Count == 0)
+        {
+            Console.WriteLine("No contacts found.");
+            return;
+        }
+        
+        Console.WriteLine($"{contacts.Count} contact(s) found.");
+        foreach (var contact in contacts)
+        {
+            Console.WriteLine($"  {contact}");
+        }
+    }
+
+    private void SearchContacts()
+    {
+        Console.Write("Enter search query: ");
+        var query = Console.ReadLine()?.Trim();
+        if (string.IsNullOrEmpty(query))
+        {
+            Console.WriteLine("Search query cannot be empty.");
+            return;
+        }
+
+        var results = _contactService.Search(query).ToList();
+        if (results.Count == 0)
+        {
+            Console.WriteLine("No contacts matched your search.");
+            return;
+        }
+
+        Console.WriteLine($"{results.Count} contact(s) found.");
+        foreach (var contact in results)
+        {
+            Console.WriteLine($"  {contact}");
+        }
+    }
+
+    private void FilterContacts()
+    {
+        Console.WriteLine("Filter by:");
+        Console.WriteLine("1. Name");
+        Console.WriteLine("2. Email");
+        Console.WriteLine("3. Phone");
+        Console.Write("Choose a field: ");
+        var fieldChoice = Console.ReadLine()?.Trim();
+
+        if (fieldChoice is not ("1" or "2" or "3"))
+        {
+            Console.WriteLine("Invalid field choice.");
+            return;
+        }
+        
+        Console.Write("Enter value to filter by: ");
+        var value = Console.ReadLine()?.Trim();
+        if (string.IsNullOrEmpty(value))
+        {
+            Console.WriteLine("Filter value cannot be empty.");
+            return;
+        }
+
+        Func<Contact, bool> predicate = fieldChoice switch
+        {
+            "1" => c => c.Name.Contains(value, StringComparison.OrdinalIgnoreCase),
+            "2" => c => c.Email.Contains(value, StringComparison.OrdinalIgnoreCase),
+            "3" => c => c.PhoneNumber.Contains(value, StringComparison.OrdinalIgnoreCase),
+            _ => _ => false // do not filter if invalid choice, but this should never happen due to earlier check
+        };
+        
+        var results = _contactService.Filter(predicate).ToList();
+        if (results.Count == 0)
+        {
+            Console.WriteLine("No contacts matched your filter.");
+            return;
+        }
+
+        Console.WriteLine($"{results.Count} contact(s) found.");
+        foreach (var contact in results)
+        {
+            Console.WriteLine($"  {contact}");
+        }
+    }
+
+    private void SaveContacts()
+    {
+        _contactService.SaveAll();
+        Console.WriteLine("Contacts saved successfully.");
+    }
+}
+
