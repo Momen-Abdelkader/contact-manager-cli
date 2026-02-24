@@ -10,8 +10,6 @@ class Program
 {
     static async Task Main(string[] args)
     {
-        var projectDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", ".."));
-
         Console.Write("Enter the JSON file name to load (leave empty for sample data): ");
         var fileName = Console.ReadLine()?.Trim();
 
@@ -19,7 +17,7 @@ class Program
 
         if (string.IsNullOrEmpty(fileName))
         {
-            repository = new JsonRepository<Contact>(Path.Combine(projectDir, "contacts.json"));
+            repository = new JsonRepository<Contact>("contacts.json");
             var seedContacts = ContactSeeder.GetSeedContacts();
             foreach (var contact in seedContacts)
             {
@@ -29,8 +27,7 @@ class Program
         }
         else
         {
-            var filePath = Path.Combine(projectDir, fileName);
-            repository = new JsonRepository<Contact>(filePath);
+            repository = new JsonRepository<Contact>(fileName);
             await repository.Load();
             Console.WriteLine($"Loaded {repository.Count} contact(s) from '{fileName}'.");
         }
