@@ -59,8 +59,8 @@ public class ConsoleUi : IUi
                     SaveContacts();
                     break;
                 case "9":
-                    Console.WriteLine("Exiting...");
-                    return;
+                    if (ConfirmExit()) return;
+                    break;
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
                     break;
@@ -291,6 +291,27 @@ public class ConsoleUi : IUi
         {
             Console.WriteLine($"  {contact}");
         }
+    }
+
+    private bool ConfirmExit()
+    {
+        Console.Write("Save changes before exiting? (y/n): ");
+        var answer = Console.ReadLine()?.Trim().ToLower();
+        if (answer == "y")
+        {
+            _contactService.SaveAll();
+            Console.WriteLine("Changes saved. Exiting...");
+        }
+        else if (answer == "n")
+        {
+            Console.WriteLine("Changes discarded. Exiting...");
+        }
+        else
+        {
+            Console.WriteLine("Invalid input. Returning to menu.");
+            return false;
+        }
+        return true;
     }
 
     private void SaveContacts()
