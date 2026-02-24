@@ -7,6 +7,7 @@ namespace ContactManagerCLI.UI;
 public class ConsoleUi : IUi
 {
     private readonly IContactService _contactService;
+    private bool _hasUnsavedChanges;
 
     public ConsoleUi(IContactService contactService)
     {
@@ -99,6 +100,7 @@ public class ConsoleUi : IUi
 
         var contact = new Contact(name!, email!, phone!);
         _contactService.AddContact(contact);
+        _hasUnsavedChanges = true;
         Console.WriteLine("Contact added successfully.");
         Console.WriteLine($"  {contact}");
     }
@@ -163,6 +165,7 @@ public class ConsoleUi : IUi
         }
 
         _contactService.UpdateContact(contact);
+        _hasUnsavedChanges = true;
         Console.WriteLine("Contact updated successfully.");
         Console.WriteLine($"  {contact}");
     }
@@ -180,6 +183,7 @@ public class ConsoleUi : IUi
         try
         {
             _contactService.DeleteContact(id);
+            _hasUnsavedChanges = true;
             Console.WriteLine("Contact deleted successfully.");
         }
         catch (KeyNotFoundException)
@@ -295,11 +299,18 @@ public class ConsoleUi : IUi
 
     private async Task<bool> ConfirmExit()
     {
+        if (!_hasUnsavedChanges)
+        {
+            Console.WriteLine("Exiting...");
+            return true;
+        }
+
         Console.Write("Save changes before exiting? (y/n): ");
         var answer = Console.ReadLine()?.Trim().ToLower();
         if (answer == "y")
         {
             await _contactService.SaveAll();
+            _hasUnsavedChanges = false;
             Console.WriteLine("Changes saved. Exiting...");
         }
         else if (answer == "n")
@@ -317,6 +328,7 @@ public class ConsoleUi : IUi
     private async Task SaveContacts()
     {
         await _contactService.SaveAll();
+        _hasUnsavedChanges = false;
         Console.WriteLine("Contacts saved successfully.");
     }
 }
