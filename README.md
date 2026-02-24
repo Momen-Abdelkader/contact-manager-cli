@@ -15,7 +15,8 @@ A simple command-line contact management app built with .NET 10. Supports CRUD o
 - List all contacts
 - Search across name, email, and phone number
 - Filter contacts by a specific field
-- Load and save contacts from/to a JSON file, saves data to `contacts.json` in the project directory (.json files are not pushed to the repository).
+- Non-blocking I/O for loading and saving data
+- Persist contacts to JSON files in the executable directory (e.g., `bin/Debug/net10.0/contacts.json`)
 
 ## Class Diagram
 
@@ -48,8 +49,8 @@ classDiagram
         +Add(entity: T)
         +Update(entity: T)
         +Delete(id: Guid)
-        +SaveAll()
-        +Load()
+        +SaveAll() Task
+        +Load() Task
     }
 
     class JsonRepository {
@@ -69,7 +70,7 @@ classDiagram
         +AddContact(contact: Contact)
         +UpdateContact(contact: Contact)
         +DeleteContact(id: Guid)
-        +SaveAll()
+        +SaveAll() Task
     }
 
     class ContactService {
@@ -80,17 +81,18 @@ classDiagram
     ContactService --> IRepository : uses
 
     %% ── UI Layer ──
-    class IUi {
+    class IUI {
         <<interface>>
-        +Run()
+        +Run() Task
     }
 
-    class ConsoleUi {
+    class ConsoleUI {
         -contactService: IContactService
+        -hasUnsavedChanges: bool
     }
 
-    IUi <|.. ConsoleUi
-    ConsoleUi --> IContactService : uses
+    IUI <|.. ConsoleUI
+    ConsoleUI --> IContactService : uses
 
     %% ── Utilities ──
     class ContactValidator {
@@ -103,14 +105,19 @@ classDiagram
         +GetSeedContacts() List~Contact~$
     }
 
-    ConsoleUi --> ContactValidator : validates input
+    ConsoleUI --> ContactValidator : validates input
     ContactSeeder ..> Contact : creates
 ```
+
+**Design Principles:**
+- **Dependency Inversion** — layers depend on abstractions (`IRepository`, `IContactService`, `IUI`) not implementations
+- **Single Responsibility** — each class has one clear purpose (repository for persistence, service for business logic, UI for presentation)
+- **Open/Closed** — new entities can be added by extending `BaseEntity` without modifying `JsonRepository<T>`; new repository types (e.g., SQL, XML) can be swapped in without affecting other layers by implementing `IRepository`.
+- **Separation of Concerns** — data, business logic, and presentation are cleanly separated
 
 **Notes:**
 
 - `BaseEntity` holds `Id` and `CreatedAt`, both auto-generated on creation. Any entity added to app should inherit from it.
-- `IRepository<T>` is the generic interface exposed by the persistance layer, it can store any entity that inherits from `BaseEntity`. This makes swapping different implemenations simple.
 - `ContactSeeder` provides sample data when no file is specified to load the data.
 - `ContactValidator` uses Regex to validate email and phone input.
 
