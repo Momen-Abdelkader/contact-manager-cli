@@ -1,6 +1,6 @@
 namespace ContactManagerCLI.UI;
 
-public interface IUi
+public interface IUI
 {
     Task Run();
 }

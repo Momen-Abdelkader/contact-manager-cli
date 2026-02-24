@@ -4,12 +4,12 @@ using ContactManagerCLI.Validation;
 
 namespace ContactManagerCLI.UI;
 
-public class ConsoleUi : IUi
+public class ConsoleUI : IUI
 {
     private readonly IContactService _contactService;
     private bool _hasUnsavedChanges;
 
-    public ConsoleUi(IContactService contactService)
+    public ConsoleUI(IContactService contactService)
     {
         _contactService = contactService;
     }

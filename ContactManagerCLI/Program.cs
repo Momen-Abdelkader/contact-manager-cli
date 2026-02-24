@@ -33,7 +33,7 @@ class Program
         }
 
         var service = new ContactService(repository);
-        var ui = new ConsoleUi(service);
+        var ui = new ConsoleUI(service);
         await ui.Run();
     }
 }
