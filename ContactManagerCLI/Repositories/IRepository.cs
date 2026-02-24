@@ -1,13 +1,15 @@
+using ContactManagerCLI.Models;
+
 namespace ContactManagerCLI.Repositories;
 
-public interface IRepository<T>
+public interface IRepository<T> where T : BaseEntity
 {
     List<T> GetAll();
-    T? GetById(int id);
+    T? GetById(Guid id);
     IEnumerable<T> Find(Func<T, bool> predicate);
-    void Add(T item);
-    void Update(T item);
-    void Delete(int id);
+    void Add(T entity);
+    void Update(T entity);
+    void Delete(Guid id);
     void SaveAll();
     void Load();
 }
