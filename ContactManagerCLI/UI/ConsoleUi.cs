@@ -1,5 +1,6 @@
 using ContactManagerCLI.Models;
 using ContactManagerCLI.Services;
+using ContactManagerCLI.Validation;
 
 namespace ContactManagerCLI.UI;
 
@@ -71,29 +72,32 @@ public class ConsoleUi : IUi
     {
         Console.Write("Name: ");
         var name = Console.ReadLine()?.Trim();
-        if (string.IsNullOrEmpty(name))
+        var nameError = ContactValidator.ValidateName(name);
+        if (nameError is not null)
         {
-            Console.WriteLine("Name cannot be empty.");
+            Console.WriteLine(nameError);
             return;
         }
 
         Console.Write("Email: ");
         var email = Console.ReadLine()?.Trim();
-        if (string.IsNullOrEmpty(email))
+        var emailError = ContactValidator.ValidateEmail(email);
+        if (emailError is not null)
         {
-            Console.WriteLine("Email cannot be empty.");
+            Console.WriteLine(emailError);
             return;
         }
 
         Console.Write("Phone: ");
         var phone = Console.ReadLine()?.Trim();
-        if (string.IsNullOrEmpty(phone))
+        var phoneError = ContactValidator.ValidatePhone(phone);
+        if (phoneError is not null)
         {
-            Console.WriteLine("Phone cannot be empty.");
+            Console.WriteLine(phoneError);
             return;
         }
 
-        var contact = new Contact(name, email, phone);
+        var contact = new Contact(name!, email!, phone!);
         _contactService.AddContact(contact);
         Console.WriteLine("Contact added successfully.");
         Console.WriteLine($"  {contact}");
@@ -121,6 +125,12 @@ public class ConsoleUi : IUi
         var name = Console.ReadLine()?.Trim();
         if (!string.IsNullOrEmpty(name))
         {
+            var nameError = ContactValidator.ValidateName(name);
+            if (nameError is not null)
+            {
+                Console.WriteLine(nameError);
+                return;
+            }
             contact.Name = name;
         }
 
@@ -129,6 +139,12 @@ public class ConsoleUi : IUi
         var email = Console.ReadLine()?.Trim();
         if (!string.IsNullOrEmpty(email))
         {
+            var emailError = ContactValidator.ValidateEmail(email);
+            if (emailError is not null)
+            {
+                Console.WriteLine(emailError);
+                return;
+            }
             contact.Email = email;
         }
 
@@ -137,6 +153,12 @@ public class ConsoleUi : IUi
         var phone = Console.ReadLine()?.Trim();
         if (!string.IsNullOrEmpty(phone))
         {
+            var phoneError = ContactValidator.ValidatePhone(phone);
+            if (phoneError is not null)
+            {
+                Console.WriteLine(phoneError);
+                return;
+            }
             contact.PhoneNumber = phone;
         }
 
