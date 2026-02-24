@@ -1,6 +1,10 @@
 namespace ContactManagerCLI.Models;
 
-public class Contact
+public class Contact(string name, string email, string phoneNumber)
 {
-    // TODO: implement
+    public Guid Id { get; } = Guid.NewGuid();
+    public string Name { get; set; } = name;
+    public string Email { get; set; } = email;
+    public string PhoneNumber { get; set; } = phoneNumber;
+    public DateTimeOffset CreatedAt { get; } = DateTimeOffset.Now;
 }
